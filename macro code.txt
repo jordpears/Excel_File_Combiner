@@ -1,0 +1,54 @@
+Sub filecompiler()
+
+    Dim cellId      As String
+    Dim topId       As String
+    Dim sPath       As String
+    Dim folderName  As String
+    Dim vaArray     As Variant
+    Dim i           As Integer
+    Dim oFile       As Object
+    Dim oFSO        As Object
+    Dim oFolder     As Object
+    Dim oFiles      As Object
+    Dim elementOnSheet As String
+    Dim locationOfTop  As Range
+    Dim elementAtVal   As String
+ 
+    Application.ScreenUpdating = False
+
+    'CAN CHANGE THESE CONSTANTS'
+
+    topId = "#TOP" 'the top of the column to place the numbers'
+    folderName = "\TO_COMPILE" 'the name of the folder of sheets to collate'
+    cellId = "C11" 'the cell id on each of the sheets to collate with the specific value'
+    
+    'CONSTANTS END'
+    
+    sPath = ThisWorkbook.Path & folderName
+    Set oFSO = CreateObject("Scripting.FileSystemObject")
+    Set oFolder = oFSO.GetFolder(sPath)
+    Set oFiles = oFolder.Files
+
+    If oFiles.Count = 0 Then Exit Sub
+
+    ReDim vaArray(1 To oFiles.Count)
+    i = 1
+    For Each oFile In oFiles
+        vaArray(i) = oFile.Name
+        i = i + 1
+    Next
+
+    listfiles = vaArray
+    
+    Set locationOfTop = ThisWorkbook.Sheets(1).Range("A1:Z10000").Find(topId)
+    
+    For i = 1 To (UBound(listfiles) - LBound(listfiles) + 1)
+        Set wkb = Workbooks.Open(ThisWorkbook.Path & folderName & "\" & listfiles(i))
+        wkb.Activate
+        elementAtVal = wkb.Sheets(1).Range("C11").Value
+        locationOfTop.Offset(i, 0).Value = elementAtVal
+        wkb.Close
+    Next i
+    
+
+End Sub
